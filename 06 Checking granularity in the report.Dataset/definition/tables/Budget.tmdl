@@ -19,11 +19,8 @@ table Budget
 		lineageTag: 19cab6ff-e769-41b7-9cc7-6c58faa79da7
 
 	measure 'Correct Budget Amt' =
-			
-			IF (
-			    AND (
-			        [#Prods] = [#BrandProds],
-			        [#Cust] = [#CountryCust]
+			Swicth(TRUE(),
+			        [#Prods] = [#BrandProds] && [#Cust] = [#CountryCust]
 			    ),
 			    [SumOfBudget]
 			)
