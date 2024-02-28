@@ -1,0 +1,128 @@
+table Customer
+	lineageTag: da1e9e34-509f-4893-b8c4-3ef0fe9ad059
+
+	measure #Cust = COUNTROWS ( Customer )
+		formatString: 0
+		lineageTag: 958cb331-11f2-4fb0-a85a-b8b21aa68f2f
+
+	measure #CountryCust =
+			
+			CALCULATE (
+			    [#Cust],
+			    ALL ( Customer ),
+			    VALUES ( Customer[CountryRegion] )
+			)
+		formatString: 0
+		lineageTag: 19a53cd5-d925-42ae-a88e-3895bc1168dd
+
+	column CustomerKey
+		dataType: int64
+		isHidden
+		isNullable: false
+		lineageTag: 635ecb09-f2b9-4266-933a-b15149ce06b4
+		summarizeBy: none
+		sourceColumn: CustomerKey
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Customer Code'
+		dataType: string
+		lineageTag: 0d2722a7-8b66-4c72-9fe7-bf25d38f0f0e
+		summarizeBy: none
+		sourceColumn: Customer Code
+
+		annotation SummarizationSetBy = Automatic
+
+	column Name
+		dataType: string
+		lineageTag: 67ea5354-8e64-4aac-be74-d58978884d13
+		summarizeBy: none
+		sourceColumn: Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Education
+		dataType: string
+		lineageTag: 4e2e2a96-20a7-4b92-87f3-1b98ecc4afaf
+		summarizeBy: none
+		sourceColumn: Education
+
+		annotation SummarizationSetBy = Automatic
+
+	column Occupation
+		dataType: string
+		lineageTag: 695b99d2-bd7c-4ae6-a03d-056a46693d96
+		summarizeBy: none
+		sourceColumn: Occupation
+
+		annotation SummarizationSetBy = Automatic
+
+	column Continent
+		dataType: string
+		lineageTag: c47bcdc5-d8ab-4946-a0f4-c63bd37c36d0
+		summarizeBy: none
+		sourceColumn: Continent
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 40054ec3-67f7-474b-ae55-4af20a26efa7
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column State
+		dataType: string
+		lineageTag: 39ab21cf-d58e-419a-84db-105485223006
+		summarizeBy: none
+		sourceColumn: State
+
+		annotation SummarizationSetBy = Automatic
+
+	column CountryRegion
+		dataType: string
+		lineageTag: ab3d821a-4b5d-4758-9542-cec976505849
+		summarizeBy: none
+		sourceColumn: CountryRegion
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'DaxBook Customer' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("Demo", "ContosoRetailDW"),
+				    DaxBook_Customer = Source{[Schema="DaxBook",Item="Customer"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(DaxBook_Customer,{"Phone", "Address Line 2", "Title", "GeographyKey", "Birth Date", "Marital Status", "Cars Owned", "Children At Home", "Total Children", "Address Line 1", "Date First Purchase", "Customer Type", "Company Name", "House Ownership", "Yearly Income", "Gender"}),
+				    #"Filtered Rows" = Table.SelectRows(#"Removed Columns", each [CountryRegion] = "United States" or [CountryRegion] = "Germany" or [CountryRegion] = "China")
+				in
+				    #"Filtered Rows"
+
+		annotation IsQueryEditorUsed = False
+
+		annotation QueryEditorSerialization
+
+		annotation TableWidgetSerialization
+
+	annotation _TM_ExtProp_QueryDefinition = SELECT * FROM [Customer]
+
+	annotation _TM_ExtProp_DbTableName = 63
+
+	annotation IsQueryEditorUsed = False
+
+	annotation QueryEditorSerialization
+
+	annotation TableWidgetSerialization
+
+	annotation DataMarketWebBaseUrl
+
+	annotation DataMarketWebQueryUrl
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

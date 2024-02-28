@@ -1,0 +1,103 @@
+table Budget
+	lineageTag: ae47ac95-3c19-45ee-b3c2-5968f8934231
+
+	measure SumOfBudget = SUM ( Budget[Budget] )
+		formatString: #,0.00
+		lineageTag: 6efda837-cb26-4a5d-9930-4fedf0f0a4df
+
+	measure 'Budget Amt' =
+			
+			VAR Brands = VALUES ( 'Product'[Brand] )
+			VAR Countries = VALUES ( Customer[CountryRegion] )
+			RETURN
+			CALCULATE (
+			    [SumOfBudget],
+			    TREATAS ( Brands, Budget[Brand] ),
+			    TREATAS ( Countries, Budget[CountryRegion] )
+			)
+		formatString: #,0.00
+		lineageTag: 19cab6ff-e769-41b7-9cc7-6c58faa79da7
+
+	measure 'Correct Budget Amt' =
+			
+			IF (
+			    AND (
+			        [#Prods] = [#BrandProds],
+			        [#Cust] = [#CountryCust]
+			    ),
+			    [SumOfBudget]
+			)
+		formatString: #,0.00
+		lineageTag: edabf3ce-ddd1-444e-8c57-3da551baf5bd
+
+	column CountryRegion
+		dataType: string
+		lineageTag: a3d00700-6e60-4a6d-b393-4acc2c322651
+		summarizeBy: none
+		sourceColumn: CountryRegion
+
+		annotation SummarizationSetBy = Automatic
+
+	column Brand
+		dataType: string
+		isHidden
+		lineageTag: 13fa154e-c4e1-40da-b313-065c629c5f9b
+		summarizeBy: none
+		sourceColumn: Brand
+
+		annotation SummarizationSetBy = Automatic
+
+	column Scenario
+		dataType: string
+		lineageTag: adb190cd-262c-4e9f-9121-14d8c96098d5
+		summarizeBy: none
+		sourceColumn: Scenario
+		sortByColumn: 'Scenario Sort'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Budget
+		dataType: int64
+		formatString: #,0.00
+		lineageTag: 2f0a1571-658b-4fdc-b2fd-9e3b831ed1b5
+		summarizeBy: sum
+		sourceColumn: Budget
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Scenario Sort'
+		dataType: string
+		isHidden
+		lineageTag: 1e86b116-2ded-4491-aa36-7435ee2aa319
+		summarizeBy: none
+		sourceColumn: Scenario Sort
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column NewBrand = IF ( Budget[Brand] = "A. Datum", "Empty", Budget[Brand] )
+		dataType: string
+		lineageTag: 66290cde-15c2-41c6-8b9f-c9c0f7d13765
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Budget-5dfd0575-fa9e-44b9-b0e1-25144c703ca4 = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("H:\SQLBI\Conferences\User Group Sessions\Budgeting with Power BI\Budget.xlsx"), null, true),
+				    Budget_Table = Source{[Item="Budget",Kind="Table"]}[Data],
+				    #"Unpivoted Columns" = Table.UnpivotOtherColumns(Budget_Table, {"CountryRegion", "Brand"}, "Attribute", "Value"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Unpivoted Columns",{{"Attribute", "Scenario"}, {"Value", "Budget"}}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"CountryRegion", type text}, {"Brand", type text}, {"Budget", Int64.Type}}),
+				    #"Added Custom" = Table.AddColumn(#"Changed Type", "Scenario Sort", each if [Scenario] = "Low" then 1 else if [Scenario] = "Medium" then 2 else 3)
+				in
+				    #"Added Custom"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

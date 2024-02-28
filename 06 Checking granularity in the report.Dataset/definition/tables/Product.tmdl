@@ -1,0 +1,118 @@
+table Product
+	lineageTag: 59d98250-2e0f-4105-b22b-54330ce38098
+
+	measure #Prods = COUNTROWS( 'Product' )
+		formatString: 0
+		lineageTag: 1223ec67-f166-4f84-8736-22505f4c430c
+
+	measure #BrandProds =
+			
+			CALCULATE (
+			    [#Prods],
+			    ALL ( 'Product' ),
+			    VALUES ( 'Product'[Brand] )
+			)
+		formatString: 0
+		lineageTag: a5f819d0-8ced-492f-adce-0fcf1c214a5d
+
+	column ProductKey
+		dataType: int64
+		isNullable: false
+		lineageTag: 30972a74-8c99-4d81-aacc-449128a40cd5
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: d519e413-2adc-4ab0-8247-c7f74d7b50a4
+		summarizeBy: none
+		sourceColumn: Product Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Brand
+		dataType: string
+		lineageTag: 191f758d-4c88-4fda-9e99-e05d737231e6
+		summarizeBy: none
+		sourceColumn: Brand
+
+		annotation SummarizationSetBy = Automatic
+
+	column Color
+		dataType: string
+		lineageTag: e04cf645-bc0e-4817-a0de-f21e69064cb8
+		summarizeBy: none
+		sourceColumn: Color
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subcategory
+		dataType: string
+		lineageTag: 6c73fc83-85d1-4580-b354-1ce7d3cdbf34
+		summarizeBy: none
+		sourceColumn: Subcategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 9c5309e6-f217-41db-9c82-d5c2fe3651e4
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Unit Cost'
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: d09d7336-c33f-4ecd-9af3-a3f258b99183
+		summarizeBy: sum
+		sourceColumn: Unit Cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	partition 'DaxBook Product' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("Demo", "ContosoRetailDW"),
+				    DaxBook_Product = Source{[Schema="DaxBook",Item="Product"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(DaxBook_Product,{"Manufacturer", "Class", "Style", "Size", "Weight", "Weight Unit Measure", "Stock Type Code", "Stock Type", "Status", "Available Date", "Product Description"}),
+				    #"Merged Queries" = Table.NestedJoin(#"Removed Columns",{"ProductSubcategoryKey"},#"Product Subcategory",{"ProductSubcategoryKey"},"NewColumn",JoinKind.LeftOuter),
+				    #"Expanded NewColumn" = Table.ExpandTableColumn(#"Merged Queries", "NewColumn", {"Subcategory", "ProductCategoryKey"}, {"Subcategory", "ProductCategoryKey"}),
+				    #"Merged Queries1" = Table.NestedJoin(#"Expanded NewColumn",{"ProductCategoryKey"},#"Product Category",{"ProductCategoryKey"},"NewColumn",JoinKind.LeftOuter),
+				    #"Expanded NewColumn1" = Table.ExpandTableColumn(#"Merged Queries1", "NewColumn", {"Category"}, {"Category"}),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Expanded NewColumn1",{"ProductCategoryKey", "ProductSubcategoryKey", "Product Code", "Unit Price"})
+				in
+				    #"Removed Columns1"
+
+		annotation IsQueryEditorUsed = False
+
+		annotation QueryEditorSerialization
+
+		annotation TableWidgetSerialization
+
+	annotation _TM_ExtProp_QueryDefinition = SELECT * FROM [Product]
+
+	annotation _TM_ExtProp_DbTableName = 525
+
+	annotation IsQueryEditorUsed = False
+
+	annotation QueryEditorSerialization
+
+	annotation TableWidgetSerialization
+
+	annotation DataMarketWebBaseUrl
+
+	annotation DataMarketWebQueryUrl
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

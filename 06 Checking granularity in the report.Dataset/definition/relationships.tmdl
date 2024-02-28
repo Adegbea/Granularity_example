@@ -1,0 +1,27 @@
+relationship ab1aeb10-6713-4f0f-9473-659c672a8d57
+	fromColumn: Sales.ProductKey
+	toColumn: Product.ProductKey
+
+relationship 9ce5317f-f1ca-4fe2-b8ee-783b3b45e387
+	fromColumn: Sales.OrderDateKey
+	toColumn: Date.DateKey
+
+relationship 9256a31b-d5b0-4327-bb1c-f060e735af05
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Date.Date
+	toColumn: LocalDateTable_16e61699-35d6-4f9d-b06b-4337697a4e10.Date
+
+relationship 26732aa1-2f08-4cd1-b5a4-41a1f4b7312c
+	fromColumn: Sales.CustomerKey
+	toColumn: Customer.CustomerKey
+
+relationship 629e95bf-de12-4373-8c22-f213e246b53c
+	toCardinality: many
+	fromColumn: Budget.CountryRegion
+	toColumn: Customer.CountryRegion
+
+relationship 985e1d1b-c3f2-4b4e-ad96-6d36d88b05ad
+	toCardinality: many
+	fromColumn: Budget.Brand
+	toColumn: Product.Brand
+

@@ -1,0 +1,92 @@
+table Date
+	lineageTag: 5fedce0c-dbca-4c3b-b4d9-4ed58a4f06b8
+
+	column Date
+		dataType: dateTime
+		isNullable: false
+		formatString: Long Date
+		lineageTag: 03b89d9a-e08b-486d-b834-9a4166e0e48e
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: 9256a31b-d5b0-4327-bb1c-f060e735af05
+			defaultHierarchy: LocalDateTable_16e61699-35d6-4f9d-b06b-4337697a4e10.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column DateKey
+		dataType: int64
+		isHidden
+		isNullable: false
+		lineageTag: 678b47a7-dcfb-4e7e-a1f9-9f13fa1dccbc
+		summarizeBy: none
+		sourceColumn: DateKey
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Calendar Year'
+		dataType: string
+		lineageTag: dc51693d-e4b1-42f1-9bfe-4b4fb952b779
+		summarizeBy: none
+		sourceColumn: Calendar Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number'
+		dataType: int64
+		isHidden
+		lineageTag: 34269e97-a457-4240-a271-b3fac1b618ee
+		summarizeBy: sum
+		sourceColumn: Month Number
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Month
+		dataType: string
+		lineageTag: 072e8e87-9e88-477e-a6d4-b679acb1e05d
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: 'Month Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'DaxBook Date' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("Demo", "ContosoRetailDW"),
+				    DaxBook_Date = Source{[Schema="DaxBook",Item="Date"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(DaxBook_Date,{"Calendar Year Number", "Calendar Year Quarter Number", "Calendar Year Quarter", "Calendar Year Month Number", "Calendar Year Month", "Day of Week Number", "Day of Week", "Fiscal Year Number", "Fiscal Year", "Fiscal Quarter Number", "Fiscal Quarter", "Fiscal Year Quarter Number", "Fiscal Year Quarter", "Fiscal Month Number", "Fiscal Month", "Working Day", "Is Holiday", "Holiday Name", "Europe Season", "North America Season", "Asia Season"})
+				in
+				    #"Removed Columns"
+
+		annotation IsQueryEditorUsed = False
+
+		annotation QueryEditorSerialization
+
+		annotation TableWidgetSerialization
+
+	annotation _TM_ExtProp_QueryDefinition = SELECT * FROM [Date]
+
+	annotation _TM_ExtProp_DbTableName = 290
+
+	annotation IsQueryEditorUsed = False
+
+	annotation QueryEditorSerialization
+
+	annotation TableWidgetSerialization
+
+	annotation DataMarketWebBaseUrl
+
+	annotation DataMarketWebQueryUrl
+
+	annotation PBI_ResultType = Exception
+

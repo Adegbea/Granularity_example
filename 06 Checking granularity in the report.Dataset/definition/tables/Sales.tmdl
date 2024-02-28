@@ -1,0 +1,117 @@
+table Sales
+	lineageTag: 18a398c8-9f01-4389-aa04-982207473bfc
+
+	measure 'Sales Amount' = SUMX ( Sales, Sales[Quantity] * Sales[Net Price] )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: a1f6796d-407c-4dc8-9262-960fd06e20de
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Sales in 2009' = CALCULATE( [Sales Amount], 'Date'[Calendar Year] = "CY 2009" )
+		formatString: #,0.00
+		lineageTag: d520c0ed-778c-4167-badf-663eb17f90a2
+
+	measure 'Cost Ratio' = ```
+			
+			CALCULATE ( 
+				DIVIDE ( 
+					SUMX ( Sales, Sales[Quantity] * RELATED( 'Product'[Unit Cost] ) ),
+					SUMX ( Sales, Sales[Quantity] * Sales[Net Price] )
+				),
+				'Date'[Calendar Year] = "CY 2009" 
+			)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 15a6ae37-3b6e-4cf8-9241-93757e18b358
+
+	column ProductKey
+		dataType: int64
+		isHidden
+		lineageTag: 63f65d3f-31f4-4f57-8e18-e910195a814b
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CustomerKey
+		dataType: int64
+		isHidden
+		lineageTag: 5b2acd91-b4cf-42cc-9cae-bd215be25a7e
+		summarizeBy: none
+		sourceColumn: CustomerKey
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column OrderDateKey
+		dataType: int64
+		isHidden
+		lineageTag: 298c5382-1bd6-4719-b5ef-e099beffae82
+		summarizeBy: none
+		sourceColumn: OrderDateKey
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: int64
+		isHidden
+		lineageTag: 2d98ef27-f482-4d56-b7f3-ecc94b03b37b
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Net Price'
+		dataType: decimal
+		isHidden
+		lineageTag: bf89ec37-834d-4f4f-80ef-306017c0430b
+		summarizeBy: sum
+		sourceColumn: Net Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'DaxBook Sales' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database("Demo", "ContosoRetailDW"),
+				    DaxBook_Sales = Source{[Schema="DaxBook",Item="Sales"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(DaxBook_Sales,{"CurrencyKey", "Order Date", "Due Date", "Delivery Date", "Order Number", "Order Line Number", "PromotionKey", "StoreKey"}),
+				    #"Merged Queries" = Table.NestedJoin(#"Removed Columns",{"CustomerKey"},Customer,{"CustomerKey"},"NewColumn",JoinKind.RightOuter),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Merged Queries",{"NewColumn", "DueDateKey", "DeliveryDateKey", "Unit Discount", "Unit Cost", "Unit Price", "OnlineSalesKey"})
+				in
+				    #"Removed Columns1"
+
+		annotation IsQueryEditorUsed = False
+
+		annotation QueryEditorSerialization
+
+		annotation TableWidgetSerialization
+
+	annotation _TM_ExtProp_QueryDefinition = SELECT * FROM [Sales]
+
+	annotation _TM_ExtProp_DbTableName = 905
+
+	annotation IsQueryEditorUsed = False
+
+	annotation QueryEditorSerialization
+
+	annotation TableWidgetSerialization
+
+	annotation DataMarketWebBaseUrl
+
+	annotation DataMarketWebQueryUrl
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+
