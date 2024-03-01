@@ -73,7 +73,7 @@ table Budget
 
 		annotation SummarizationSetBy = Automatic
 
-	column NewBrand = IF ( Budget[Brand] = "A. Datum", "Empty", Budget[Brand] )
+	column NewBrand = SWITCH ( TRUE(), Budget[Brand] = "A. Datum", "Empty", Budget[Brand] )
 		dataType: string
 		lineageTag: 66290cde-15c2-41c6-8b9f-c9c0f7d13765
 		summarizeBy: none
